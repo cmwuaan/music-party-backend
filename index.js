@@ -1,14 +1,21 @@
-const http = require('http');
-const express = require('express');
+const express = require("express");
+const bodyParser = require("body-parser");
+const logger = require("morgan");
+const dotenv = require("dotenv");
+const connectDB = require("./database/config");
 
-const PORT = 8080;
+dotenv.config();
 
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Hello World');
-});
+connectDB();
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+
+app.use(bodyParser.json());
+app.use(logger("dev"));
+
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
 });
