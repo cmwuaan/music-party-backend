@@ -34,7 +34,7 @@ const uploadMusic = async (req, res) => {
   }
 };
 
-const getMusics = async (req, res) => {
+const getMusicList = async (req, res) => {
   try {
     const musics = await Music.find();
     res.json(musics);
@@ -44,4 +44,4 @@ const getMusics = async (req, res) => {
   }
 };
 
-module.exports = { uploadMusic, getMusics };
+module.exports = { uploadMusic, getMusicList };
