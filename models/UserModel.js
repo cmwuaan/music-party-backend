@@ -9,15 +9,15 @@ const userSchema = Schema(
       default: null,
       unique: true,
     },
-    password: {
-      type: String,
-      required: false,
-      default: null,
-    },
     email: {
       type: String,
       unique: true,
       required: [true, 'Please add your email'],
+    },
+    password: {
+      type: String,
+      required: false,
+      default: null,
     },
     displayName: {
       type: String,
@@ -33,7 +33,6 @@ const userSchema = Schema(
       required: false,
       default: null,
     },
-
     gender: {
       type: String,
       required: false,

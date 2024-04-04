@@ -11,9 +11,15 @@ const musicSchema = new Schema(
       type: String,
       required: true,
     },
+    ownerId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     author: {
       type: String,
       required: [true, 'Please provide an author name'],
+      default: 'unknown',
     },
     view: {
       type: Number,
