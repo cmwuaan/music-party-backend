@@ -94,6 +94,7 @@ Music Party has developed 2 main features to address the issue, including `Liste
 > React, Tailwind, and NodeJS that allow us to realize the solution by creating a high-performance web application.
 
 With these technologies, we are extremely confident in developing our ideas:
+
 - ![React](https://shields.io/badge/react-black?logo=react&style=for-the-badge)
 - ![Tailwind](https://img.shields.io/badge/tailwindcss-0F172A?&logo=tailwindcss)
 - ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
