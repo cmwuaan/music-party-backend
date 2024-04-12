@@ -104,4 +104,18 @@ const updateMusicInformation = async (req, res) => {
   }
 }
 
-module.exports = { uploadMusic, getMusics, listenMusic, updateMusicInformation };
+const getTopMusic = async (req, res) => {
+  try {
+    const quantity = 20;
+    const index = (req.query.index) ? parseInt(req.query.index) : 0;
+    const musics = await Music.find().sort({ view: -1 }).skip(index).limit(quantity);
+    res.json(musics);
+
+  }
+  catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
+
+module.exports = { uploadMusic, getMusics, listenMusic, updateMusicInformation, getTopMusic };
