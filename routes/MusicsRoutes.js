@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer'); // Import multer
-const { uploadMusic, getMusics, listenMusic } = require('../controllers/MusicController');
+const { uploadMusic, getMusics, listenMusic, updateMusicInformation } = require('../controllers/MusicController');
 
 // Cấu hình multer để xử lý tải lên file nhạc
 const storage = multer.diskStorage({
@@ -22,5 +22,7 @@ router.get('/', getMusics);
 router.post('/upload', upload.single('musicFile'), uploadMusic);
 
 router.get('/listen/:id', listenMusic);
+
+router.put('/update/:id', updateMusicInformation);
 
 module.exports = router;

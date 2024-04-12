@@ -1,6 +1,7 @@
 const Music = require('../models/MusicModel');
 const { uploadBytes, getDownloadURL } = require('firebase/storage');
 const { firebaseStorage, ref } = require('../utils/Firebase');
+const { update } = require('firebase/database');
 // const asyncHandler = require('express-async-handler');
 const uploadMusic = async (req, res) => {
   try {
@@ -73,5 +74,34 @@ const listenMusic = async (req, res) => {
   }
 };
 
+const updateMusicInformation = async (req, res) => {
+  try {
+    const { musicName, genre, author, description, lyrics, releaseYear } = req.body;
 
-module.exports = { uploadMusic, getMusics, listenMusic };
+    if (!musicName || !genre || !author || !description || !releaseYear) {
+      return res.status(400).json({ message: 'Please fill in all required fields' });
+    }
+
+    const music = await Music.findById(req.params.id);
+    if (!music) {
+      return res.status(404).json({ message: 'Music not found' });
+    }
+
+    music.musicName = musicName;
+    music.genre = genre;
+    music.author = author;
+    music.description = description;
+    music.lyrics = lyrics;
+    music.releaseYear = releaseYear;
+
+    await music.save();
+
+    res.json(music);
+  }
+  catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
+
+module.exports = { uploadMusic, getMusics, listenMusic, updateMusicInformation };
