@@ -118,4 +118,20 @@ const getTopMusic = async (req, res) => {
   }
 }
 
-module.exports = { uploadMusic, getMusics, listenMusic, updateMusicInformation, getTopMusic };
+const deleteMusicById = async (req, res) => {
+  try {
+    const music = await Music.findById(req.params.id);
+    if (!music) {
+      return res.status(404).json({ message: 'Music not found' });
+    }
+    await music.deleteOne(); // or music.deleteMany() if deleting multiple documents
+    res.json({ message: 'Music removed' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+
+
+module.exports = { uploadMusic, getMusics, listenMusic, updateMusicInformation, getTopMusic, deleteMusicById };
