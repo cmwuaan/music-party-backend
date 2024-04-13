@@ -58,6 +58,19 @@ const uploadMusic = async (req, res) => {
   }
 };
 
+const getMusicById = async (req, res) => {
+  try {
+    const music = await Music.findById(req.params.id);
+    // console.log(music);
+    if (!music) {
+      return res.status(404).json({ message: 'Music not found' });
+    }
+    res.json(music);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
 
 const getMusics = async (req, res) => {
   try {
@@ -146,4 +159,4 @@ const deleteMusicById = async (req, res) => {
 
 
 
-module.exports = { uploadMusic, getMusics, listenMusic, updateMusicInformation, getTopMusic, deleteMusicById };
+module.exports = { uploadMusic, getMusicById, getMusics, listenMusic, updateMusicInformation, getTopMusic, deleteMusicById };
