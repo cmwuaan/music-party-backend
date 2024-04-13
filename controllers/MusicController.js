@@ -12,18 +12,29 @@ const uploadMusic = async (req, res) => {
     }
 
     // Lấy file nhạc từ yêu cầu
-    const musicFile = req.file;
+    const musicFile = req.files['musicFile'][0];
     if (!musicFile) {
       return res.status(400).json({ message: 'Please upload a music file' });
     }
+    const imageFile = req.files['imageFile'][0];
+    if (!imageFile) {
+      return res.status(400).json({ message: 'Please upload an image file' });
+    }
+
+
+
 
     // Tải file nhạc lên Firebase Storage
     const storageRef = ref(firebaseStorage, `music/${musicFile.originalname}`);
     const snapshot = await uploadBytes(storageRef, musicFile.buffer);
 
+
+    const imageRef = ref(firebaseStorage, `image/${imageFile.originalname}`);
+    const imageSnapshot = await uploadBytes(imageRef, imageFile.buffer);
+
     // Lấy URL của file nhạc đã tải lên
     const url = await getDownloadURL(snapshot.ref);
-
+    const imageUrl = await getDownloadURL(imageSnapshot.ref);
     // Tạo một đối tượng Music với thông tin từ req.body và URL của file nhạc
     const music = new Music({
       musicName,
@@ -33,6 +44,7 @@ const uploadMusic = async (req, res) => {
       description,
       lyrics,
       url,
+      imageUrl,
       releaseYear,
     });
 

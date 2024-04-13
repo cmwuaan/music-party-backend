@@ -19,7 +19,7 @@ const upload = multer({ storage: storage });
 router.get('/', getMusics);
 
 // Route để tải lên file nhạc
-router.post('/upload', upload.single('musicFile'), uploadMusic);
+router.post('/upload', upload.fields([{ name: 'musicFile', maxCount: 1 }, { name: 'imageFile', maxCount: 1 }]), uploadMusic);
 
 router.get('/listen/:id', listenMusic);
 
