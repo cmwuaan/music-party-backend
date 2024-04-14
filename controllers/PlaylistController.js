@@ -110,4 +110,17 @@ const deletePlaylistByID = async (req, res) => {
     }
 }
 
-module.exports = {CreatePlaylist, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID};
+const getPlaylistByID = async (req, res) => {
+    try {
+        const playlist = await Playlist.findById(req.params.id);
+        if (!playlist) {
+            return res.status(404).json({ message: 'Playlist not found' });
+        }
+        res.json(playlist);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports = {CreatePlaylist, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID, getPlaylistByID};
