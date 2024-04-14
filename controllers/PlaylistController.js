@@ -91,4 +91,23 @@ const removeSongFromPlaylist = async (req, res) => {
     }
 }
 
-module.exports = {CreatePlaylist, addNewSongToPlaylist, removeSongFromPlaylist};
+const deletePlaylistByID = async (req, res) => {
+    try {
+        const { playlistID } = req.body;
+        if (!playlistID) {
+            return res.status(400).json({ message: 'Please fill in all required fields' });
+        }
+        const playlist = await Playlist.findById(playlistID);
+        if (!playlist) {
+            return res.status(404).json({ message: 'Playlist not found' });
+        }
+        await Playlist.findByIdAndDelete(playlistID);
+        return res.status(200).json({ message: 'success' });
+    }
+    catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+}
+
+module.exports = {CreatePlaylist, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID};
