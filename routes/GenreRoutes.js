@@ -6,4 +6,6 @@ router.post('/create', createGenre);
 
 router.get('/famous', getFamousGenre);
 
+router.put('/changeStatus', changeGenreStatus);
+
 module.exports = router;
