@@ -1,6 +1,6 @@
-const Music = require('../models/MusicModel');
+const Music = require('../../models/MusicModel');
 const { uploadBytes, getDownloadURL } = require('firebase/storage');
-const { firebaseStorage, ref } = require('../utils/Firebase');
+const { firebaseStorage, ref } = require('../../utils/Firebase');
 const { update } = require('firebase/database');
 // const asyncHandler = require('express-async-handler');
 const uploadMusic = async (req, res) => {

@@ -1,6 +1,6 @@
-const Room = require('../models/RoomModel');
-const RoomTable = require('../entity/RoomTable');
-const MessageRoom = require('../models/MessageModel');
+const Room = require('../../models/RoomModel');
+const RoomTable = require('../../entity/RoomTable');
+const MessageRoom = require('../../models/MessageModel');
 const postRoom = async (req, res) => {
     try {
         const { roomName, roomOwner, roomType } = req.body;
@@ -80,5 +80,11 @@ const getCurrentRoomMusic = async (req, res) => {
         res.status(500).send('Server Error');
     }
 }
+
+// const getRoomByID = async (req, res){
+//     try {
+        
+//     }
+// }
 
 module.exports = { postRoom, postNewMusicToRoomPlaylist, removeMusicToRoomPlaylist, getCurrentRoomMusic };

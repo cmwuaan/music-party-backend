@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { postRoom
     , postNewMusicToRoomPlaylist, getCurrentRoomMusic,
-removeMusicToRoomPlaylist} = require('../controllers/RoomController');
+removeMusicToRoomPlaylist} = require('../../controllers/controllerClient/RoomController');
 
 router.post('/create', postRoom);
 

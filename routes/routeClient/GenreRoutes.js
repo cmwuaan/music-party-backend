@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createGenre, getFamousGenre, changeGenreStatus, findGenre } = require('../controllers/GenreController');
+const { createGenre, getFamousGenre, changeGenreStatus, findGenre } = require('../../controllers/controllerClient/GenreController');
 
 router.post('/create', createGenre);
 

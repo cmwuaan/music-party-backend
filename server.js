@@ -8,10 +8,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 // const usersRoutes = require('./routes/UsersRoutes');
-const musicsRoutes = require('./routes/MusicsRoutes');
-const playlistsRoutes = require('./routes/PlaylistsRoutes');
-const genreRoutes = require('./routes/GenreRoutes');
-const roomRoutes = require('./routes/RoomRoutes');
+const musicsRoutes = require('./routes/routeClient/MusicsRoutes');
+const playlistsRoutes = require('./routes/routeClient/PlaylistsRoutes');
+const genreRoutes = require('./routes/routeClient/GenreRoutes');
+const roomRoutes = require('./routes/routeClient/RoomRoutes');
 
 
 connectDB();
