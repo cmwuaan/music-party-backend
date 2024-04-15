@@ -11,11 +11,16 @@ app.use(bodyParser.json());
 const musicsRoutes = require('./routes/MusicsRoutes');
 const playlistsRoutes = require('./routes/PlaylistsRoutes');
 const genreRoutes = require('./routes/GenreRoutes');
+const roomRoutes = require('./routes/RoomRoutes');
+
+
 connectDB();
 
 app.use('/api/musics', musicsRoutes); // => /api/musics
 app.use('/api/playlists', playlistsRoutes); // => /api/playlists
 app.use('/api/genre', genreRoutes); // => /api/genre
+app.use('/api/room', roomRoutes); // => /api/room
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
