@@ -18,13 +18,15 @@ const createGenre = async (req, res) => {
 };
 
 const getFamousGenre = async (req, res) => {
-    // try {
-    //     const musicGenre = req.body.musicGenre;
-    //     const musicQuantity = req.body.musicQuantity;
-    //     const isPublic = req.body.isPublic;
-    //     const view = req.body.view;
-    //     const sortedGenres = await musicGenre.find().sort({ view: -1 });
-    // }
+    try {
+        const genre = await Genre.find({}).sort({ view: -1 }).limit(10);
+        res.status(200).json({ genre });
+        
+    }
+    catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
 
 }
 
