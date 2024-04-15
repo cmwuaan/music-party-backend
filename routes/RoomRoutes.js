@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { postRoom } = require('../controllers/RoomController');
+const { postRoom
+, postNewMusicToRoomPlaylist} = require('../controllers/RoomController');
 
 router.post('/create', postRoom);
+
+router.post('/addMusic', postNewMusicToRoomPlaylist)
 module.exports = router;
