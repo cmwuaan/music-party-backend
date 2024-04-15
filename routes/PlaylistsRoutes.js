@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { CreatePlaylist, getPlaylistByID, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID } = require('../controllers/PlaylistController');
+const { CreatePlaylist, getMostPopularPlaylist, getPlaylistByID, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID } = require('../controllers/PlaylistController');
 const multer = require('multer');
 
 const storage = multer.diskStorage({
@@ -24,4 +24,6 @@ router.delete('/removeSong', removeSongFromPlaylist);
 router.delete('/deletePlaylist', deletePlaylistByID)
 
 router.get('/getPlaylist/:id', getPlaylistByID);
+
+router.get('/getMostPopularPlaylist', getMostPopularPlaylist);
 module.exports = router;    

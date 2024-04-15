@@ -123,4 +123,15 @@ const getPlaylistByID = async (req, res) => {
     }
 }
 
-module.exports = {CreatePlaylist, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID, getPlaylistByID};
+const getMostPopularPlaylist = async (req, res) => {
+    try {
+        const playlists = await Playlist.find().sort({ view: -1 }).limit(10);
+        res.json(playlists);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+}
+
+
+module.exports = {CreatePlaylist, getMostPopularPlaylist, addNewSongToPlaylist, removeSongFromPlaylist, deletePlaylistByID, getPlaylistByID};
