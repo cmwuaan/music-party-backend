@@ -53,3 +53,5 @@ const socketInit = (io) => {
         });
     });
 }
+
+module.exports = socketInit;
