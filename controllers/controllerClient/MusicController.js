@@ -13,6 +13,7 @@ const uploadMusic = async (req, res) => {
 
     // Lấy file nhạc từ yêu cầu
     const musicFile = req.files['musicFile'][0];
+    console.log("filesize",musicFile.size)
     if (!musicFile) {
       return res.status(400).json({ message: 'Please upload a music file' });
     }
@@ -21,14 +22,12 @@ const uploadMusic = async (req, res) => {
       return res.status(400).json({ message: 'Please upload an image file' });
     }
 
-
-
-
     // Tải file nhạc lên Firebase Storage
+    const musicFileData = musicFile.buffer || musicFile.data;
     const storageRef = ref(firebaseStorage, `music/${musicFile.originalname}`);
-    const snapshot = await uploadBytes(storageRef, musicFile.buffer);
-
-
+    const snapshot = await uploadBytes(storageRef,  musicFileData);
+    console.log("snapshot", snapshot)
+    
     const imageRef = ref(firebaseStorage, `image/${imageFile.originalname}`);
     const imageSnapshot = await uploadBytes(imageRef, imageFile.buffer);
 

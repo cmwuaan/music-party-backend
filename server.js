@@ -101,7 +101,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 const socketIO = require('socket.io')(http, {
     cors: {
-        origin: "http://localhost:3001"
+        origin: "http://localhost:3000"
     }
 });
 
