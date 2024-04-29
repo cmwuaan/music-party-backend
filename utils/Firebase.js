@@ -21,7 +21,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
-const firebaseStorage = getStorage(app);
+const firebaseStorage = getStorage(firebaseApp);
 
 // Delete file from Firebase Storage
 const deletefile = async (filePath, fileType, id) => {
