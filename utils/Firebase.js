@@ -20,8 +20,16 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-
+const firebaseApp = initializeApp(firebaseConfig);
 const firebaseStorage = getStorage(app);
 
-module.exports = { app, firebaseStorage, ref };
+// Delete file from Firebase Storage
+const deletefile = async (filePath, fileType, id) => {
+  const path = `${filePath}/${id}.${fileType}`;
+
+  // Create a reference to the file to delete
+  const objectRef = ref(firebaseStorage, path);
+  return await deleteObject(objectRef);
+};
+
+module.exports = { firebaseApp, firebaseStorage, deletefile };
