@@ -1,8 +1,25 @@
 const Music = require('../../models/MusicModel');
 const { uploadBytes, getDownloadURL } = require('firebase/storage');
-const { firebaseStorage, ref } = require('../../utils/Firebase');
+const { firebaseStorage, ref } = require('../../utils/firebaseConfig');
 const { update } = require('firebase/database');
 // const asyncHandler = require('express-async-handler');
+
+const getAllMusics = async (req, res) => {
+  try {
+    const musics = await Music.find();
+    res.status(200).json({
+      status: 'success',
+      results: musics.length,
+      data: {
+        musics,
+      },
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 const uploadMusic = async (req, res) => {
   try {
     const { musicName, genre, author, view, description, lyrics, releaseYear } = req.body;
@@ -65,16 +82,6 @@ const getMusicById = async (req, res) => {
       return res.status(404).json({ message: 'Music not found' });
     }
     res.json(music);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
-};
-
-const getMusics = async (req, res) => {
-  try {
-    const musics = await Music.find();
-    res.json(musics);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -152,9 +159,9 @@ const deleteMusicById = async (req, res) => {
 };
 
 module.exports = {
+  getAllMusics,
   uploadMusic,
   getMusicById,
-  getMusics,
   listenMusic,
   updateMusicInformation,
   getTopMusic,

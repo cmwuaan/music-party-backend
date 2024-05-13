@@ -1,27 +1,28 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 const Schema = mongoose.Schema;
 
 const userSchema = Schema(
   {
-    username: {
+    name: {
       type: String,
-      required: false,
-      default: null,
-      unique: true,
+      required: [true, 'Please tell us your name!'],
     },
     email: {
       type: String,
+      required: [true, 'Please provide your email'],
       unique: true,
-      required: [true, 'Please add your email'],
+      lowercase: true,
+      validate: [validator.isEmail, 'Please provide a valid email'],
     },
     password: {
       type: String,
-      required: false,
-      default: null,
+      required: [true, 'Please provide a password'],
+      minLength: 8,
     },
-    displayName: {
+    passwordConfirm: {
       type: String,
-      required: [true, 'Please add your password'],
+      required: [true, 'Please confirm your password'],
     },
     googleId: {
       type: String,
@@ -35,11 +36,11 @@ const userSchema = Schema(
     },
     gender: {
       type: String,
-      required: false,
+      required: [true, 'Please provide your gender'],
     },
     birth: {
       type: Date,
-      required: false,
+      required: [true, 'Please provide your birth'],
     },
     avatarUrl: {
       type: String,
@@ -48,11 +49,11 @@ const userSchema = Schema(
     },
     accountType: {
       type: String,
-      required: [true, 'Please add you type'],
+      required: [true, 'Please provide your type'],
     },
     role: {
       type: String,
-      required: [true, 'Please add your role'],
+      required: [true, 'Please provide your role'],
     },
     isAvailable: {
       type: Boolean,
@@ -68,4 +69,5 @@ const userSchema = Schema(
   }
 );
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+module.exports = User;

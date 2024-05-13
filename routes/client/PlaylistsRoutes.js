@@ -7,7 +7,7 @@ const {
   addNewSongToPlaylist,
   removeSongFromPlaylist,
   deletePlaylistByID,
-} = require('../../controllers/controllerClient/PlaylistController');
+} = require('../../controllers/client/PlaylistController');
 const multer = require('multer');
 
 const storage = multer.diskStorage({

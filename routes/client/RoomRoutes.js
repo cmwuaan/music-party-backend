@@ -5,7 +5,7 @@ const {
   postNewMusicToRoomPlaylist,
   getCurrentRoomMusic,
   removeMusicToRoomPlaylist,
-} = require('../../controllers/controllerClient/RoomController');
+} = require('../../controllers/client/RoomController');
 
 router.post('/create', postRoom);
 

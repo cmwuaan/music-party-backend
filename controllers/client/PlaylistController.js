@@ -1,6 +1,6 @@
 const Playlist = require('../../models/PlaylistModel');
 const { uploadBytes, getDownloadURL } = require('firebase/storage');
-const { firebaseStorage, ref } = require('../../utils/Firebase');
+const { firebaseStorage, ref } = require('../../utils/firebaseConfig');
 
 const CreatePlaylist = async (req, res) => {
   try {

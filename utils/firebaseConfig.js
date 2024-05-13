@@ -1,5 +1,6 @@
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, deleteObject } = require('firebase/storage');
+
 require('dotenv').config();
 
 const apiKey = process.env.FIREBASE_API_KEY;
