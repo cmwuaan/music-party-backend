@@ -16,6 +16,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 const errorHandler = require('./middleware/errorHandler.js');
+const AppError = require('./middleware/appError.js');
 const { socketInit } = require('./middleware/socketIO.js');
 const { authClientWeb, authAdminWeb } = require('./authentication/auth.js');
 
