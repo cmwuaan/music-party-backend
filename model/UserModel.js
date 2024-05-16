@@ -1,48 +1,44 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
-const userSchema = Schema(
+const userSchema = mongoose.Schema(
   {
     username: {
       type: String,
       required: false,
       default: null,
-      unique: true,
     },
     password: {
       type: String,
       required: false,
       default: null,
     },
-    email: {
-      type: String,
-      unique: true,
-      required: [true, 'Please add your email'],
-    },
     displayName: {
       type: String,
       required: [true, 'Please add your password'],
     },
-    googleId: {
+    googleID: {
       type: String,
       required: false,
       default: null,
     },
-    facebookId: {
+    facebookID: {
       type: String,
       required: false,
       default: null,
     },
-
+    email: {
+      type: String,
+      required: [true, 'Please add your email'],
+    },
     gender: {
       type: String,
       required: false,
     },
-    birth: {
+    birthday: {
       type: Date,
       required: false,
     },
-    avatarUrl: {
+    avatar: {
       type: String,
       required: false,
       default: true,
@@ -66,7 +62,6 @@ const userSchema = Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 module.exports = mongoose.model('User', userSchema);
