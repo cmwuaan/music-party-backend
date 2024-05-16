@@ -47,7 +47,9 @@ const connect = async () => {
     console.log(error);
   }
 };
+
 connect();
+
 const db = mongoose.connection;
 
 // Start express client app
