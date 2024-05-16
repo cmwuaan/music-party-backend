@@ -16,6 +16,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 const errorHandler = require('./middleware/errorHandler.js');
+const AppError = require('./middleware/appError.js');
 const { socketInit } = require('./middleware/socketIO.js');
 const { authClientWeb, authAdminWeb } = require('./authentication/auth.js');
 
@@ -40,16 +41,13 @@ const DB = process.env.DATABASE_URL.replace(
 
 const connect = async () => {
   try {
-    console.log(DB);
     await mongoose.connect(DB);
     console.log('Connect to mongoDB');
   } catch (error) {
     console.log(error);
   }
 };
-
 connect();
-
 const db = mongoose.connection;
 
 // Start express client app
@@ -111,7 +109,7 @@ clientApp.get('/', (req, res) => {
 // Mounting routers
 clientApp.use(
   session({
-    store: MongoStore.create({ mongoUrl: URL }),
+    store: MongoStore.create({ mongoUrl: DB }),
     secret: secretSessionKeyClient,
     resave: false,
     saveUninitialized: true,
@@ -211,7 +209,7 @@ adminApp.get('/', (req, res) => {
 // Mounting routers
 adminApp.use(
   session({
-    store: MongoStore.create({ mongoUrl: URL }),
+    store: MongoStore.create({ mongoUrl: DB }),
     secret: secretSessionKeyAdmin,
     resave: false,
     saveUninitialized: true,
