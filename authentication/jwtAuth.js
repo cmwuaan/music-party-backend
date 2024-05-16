@@ -22,7 +22,12 @@ const authenticateToken = (req, res, next) => {
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     next();
   } catch (error) {
-    if (!req.user || !req.user.refreshToken || !req.user.user || !req.user.user._id) {
+    if (
+      !req.user ||
+      !req.user.refreshToken ||
+      !req.user.user ||
+      !req.user.user._id
+    ) {
       return res.sendStatus(403).json({ message: 'Forbidden' });
     }
 
