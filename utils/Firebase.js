@@ -1,5 +1,6 @@
 const { initializeApp } = require('firebase/app');
 const { getStorage, ref, deleteObject } = require('firebase/storage');
+
 require('dotenv').config();
 
 const apiKey = process.env.FIREBASE_API_KEY;
@@ -20,8 +21,16 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
+const firebaseStorage = getStorage(firebaseApp);
 
-const firebaseStorage = getStorage(app);
+// Delete file from Firebase Storage
+const deletefile = async (filePath, fileType, id) => {
+  const path = `${filePath}/${id}.${fileType}`;
 
-module.exports = { app, firebaseStorage, ref };
+  // Create a reference to the file to delete
+  const objectRef = ref(firebaseStorage, path);
+  return await deleteObject(objectRef);
+};
+
+module.exports = { firebaseApp, firebaseStorage, deletefile };

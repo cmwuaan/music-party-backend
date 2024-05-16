@@ -1,101 +1,266 @@
+require('dotenv').config();
+
+const http = require('http');
+const mongoose = require('mongoose');
+const { Server } = require('socket.io');
 const express = require('express');
-const app = express();
-const http = require('http').Server(app);
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
+const compression = require('compression');
 const cors = require('cors');
-const bodyParser = require('body-parser');
-const connectDB = require('./config/config');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
-// Import routes
-const authRoutes = require('./routes/AuthRoutes');
-const musicsRoutes = require('./routes/routeClient/MusicsRoutes');
-const playlistsRoutes = require('./routes/routeClient/PlaylistsRoutes');
-const genreRoutes = require('./routes/routeClient/GenreRoutes');
-const roomRoutes = require('./routes/routeClient/RoomRoutes');
+const errorHandler = require('./middleware/errorHandler.js');
+const { socketInit } = require('./middleware/socketIO.js');
+const { authClientWeb, authAdminWeb } = require('./authentication/auth.js');
 
-const PORT = process.env.PORT || 5000;
+const secretSessionKeyClient = process.env.SECRET_SESSION_KEY || 'group3';
+const secretSessionKeyAdmin = process.env.SECRET_SESSION_KEY_ADMIN || 'group3';
 
-// Load env variables
-const dotenv = require('dotenv');
-dotenv.config();
+const PORT = process.env.PORT;
+const ADMIN_PORT = process.env.ADMIN_PORT;
+const CLIENT_URL = 'http://localhost:3000';
+const ADMIN_URL = 'http://localhost:3001';
 
-const socketIO = require('socket.io')(http, {
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
+const DB = process.env.DATABASE_URL.replace(
+  '<PASSWORD>',
+  process.env.DATABASE_PASSWORD,
+);
+
+const connect = async () => {
+  try {
+    console.log(DB);
+    await mongoose.connect(DB);
+    console.log('Connect to mongoDB');
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+connect();
+
+const db = mongoose.connection;
+
+// Start express client app
+const clientApp = express();
+
+var allowedOrigins = [CLIENT_URL, ADMIN_URL];
+
+// Implement CORS
+clientApp.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        var msg =
+          'The CORS policy for this site does not ' +
+          'allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    methods: 'GET,POST,PUT,DELETE',
+    credentials: true,
+  }),
+);
+
+// Set security HTTP headers
+clientApp.use(helmet());
+
+// Limit requests from same API
+const limiter = rateLimit({
+  max: 100,
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+});
+clientApp.use('/api', limiter);
+
+// Body parser, reading data from body into req.body
+clientApp.use(express.json({ limit: '10kb' }));
+clientApp.use(express.urlencoded({ extended: true, limit: '10kb' }));
+clientApp.use(errorHandler);
+clientApp.use(cookieParser());
+clientApp.set('trust proxy', 1); // Only needed for proxy
+
+// Data sanitization against NoSQL query injection
+clientApp.use(mongoSanitize());
+
+// Data sanitization against XSS
+clientApp.use(xss());
+clientApp.use(hpp());
+clientApp.use(compression());
+
+// ROUTES
+clientApp.get('/', (req, res) => {
+  res
+    .status(200)
+    .json({ message: 'Hello from the server side!', app: 'Music Party' });
+});
+
+// Mounting routers
+clientApp.use(
+  session({
+    store: MongoStore.create({ mongoUrl: URL }),
+    secret: secretSessionKeyClient,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: true, // Only set it to true if you use https
+      sameSite: 'none', // Only set it to none if you use https
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    },
+  }),
+);
+clientApp.use(authClientWeb.initialize());
+clientApp.use(authClientWeb.session());
+clientApp.use((req, res, next) => {
+  res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  res.header('Expires', '-1');
+  res.header('Pragma', 'no-cache');
+  next();
+});
+
+clientApp.use('/auth', require('./route/routeClient/authClientRoute.js'));
+clientApp.use('/api/v1/user', require('./route/routeClient/userRoute.js'));
+clientApp.use('/api/v1/music', require('./route/routeClient/musicRoute.js'));
+clientApp.use('/api/v1/genre', require('./route/routeClient/genreRoute.js'));
+clientApp.use(
+  '/api/v1/playlist',
+  require('./route/routeClient/playlistRoute.js'),
+);
+clientApp.use('/api/v1/room', require('./route/routeClient/roomRoute.js'));
+
+const server = http.createServer(clientApp);
+
+const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: CLIENT_URL,
+    methods: ['GET', 'POST'],
   },
 });
 
-app.use(bodyParser.json());
-app.use(
+socketInit(io);
+
+server.listen(PORT, () => {
+  console.log(`Client app server run on port ${PORT}`);
+});
+
+clientApp.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// ----------------------------------------- //
+// Start express client app
+const adminApp = express();
+
+adminApp.use(
   cors({
-    origin: '*',
-    methods: 'GET, POST, PUT, DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        var msg =
+          'The CORS policy for this site does not ' +
+          'allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
+    methods: 'GET,POST,PUT,DELETE',
     credentials: true,
-  })
+  }),
 );
-app.use(express.json());
 
-connectDB();
+// Set security HTTP headers
+adminApp.use(helmet());
+adminApp.use('/api', limiter);
 
-app.get('/api', (req, res) => {
-  res.json({ message: 'Hello' });
+// Body parser, reading data from body into req.body
+adminApp.use(express.json({ limit: '10kb' }));
+adminApp.use(express.urlencoded({ extended: true, limit: '10kb' }));
+adminApp.use(errorHandler);
+adminApp.use(cookieParser());
+adminApp.set('trust proxy', 1); // Only needed for proxy
+
+// Data sanitization against NoSQL query injection
+adminApp.use(mongoSanitize());
+
+// Data sanitization against XSS
+adminApp.use(xss());
+adminApp.use(hpp());
+adminApp.use(compression());
+
+// ROUTES
+adminApp.get('/', (req, res) => {
+  res
+    .status(200)
+    .json({ message: 'Hello from the server side!', app: 'Music Party' });
 });
 
-http.listen(PORT, () => {
-  console.log(`Server listening: http://localhost:${PORT}`);
+// Mounting routers
+adminApp.use(
+  session({
+    store: MongoStore.create({ mongoUrl: URL }),
+    secret: secretSessionKeyAdmin,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: true, // Only set it to true if you use https
+      sameSite: 'none', // Only set it to none if you use https
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+    },
+  }),
+);
+adminApp.use(authAdminWeb.initialize());
+adminApp.use(authAdminWeb.session());
+adminApp.use((req, res, next) => {
+  res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+  res.header('Expires', '-1');
+  res.header('Pragma', 'no-cache');
+  next();
 });
 
-app.use('/api/musics', musicsRoutes); // => /api/musics
-app.use('/api/playlists', playlistsRoutes); // => /api/playlists
-app.use('/api/genre', genreRoutes); // => /api/genre
-app.use('/api/room', roomRoutes); // => /api/room
+adminApp.use('/auth', require('./route/routeAdmin/authAdminRoute.js'));
+adminApp.use('/api/v1/user', require('./route/routeAdmin/userAdminRoute.js'));
+adminApp.use('/api/v1/music', require('./route/routeAdmin/musicAdminRoute.js'));
+adminApp.use(
+  '/api/v1/playlist',
+  require('./route/routeAdmin/playlistAdminRoute.js'),
+);
 
-// Room storage
-const rooms = {};
-socketIO.on('connection', (socket) => {
-  console.log(`⚡: ${socket.id} user just connected!`);
+const adminServer = http.createServer(adminApp);
 
-  // Join a room
-  socket.on('joinRoom', ({ username, roomId }) => {
-    // Create a new room if it doesn't exist
-    if (!rooms[roomId]) {
-      rooms[roomId] = [];
-    }
-    // Add user to the room
-    rooms[roomId].push({ id: socket.id, username });
-    socket.join(roomId);
-    // Send a message to the room that a new user has joined
-    socketIO.to(roomId).emit('message', { username: 'Admin', message: `${username} has joined the room.` });
-    // Send the updated user list to everyone in the room
-    socketIO.to(roomId).emit('userList', rooms[roomId]);
+adminServer.listen(ADMIN_PORT, () => {
+  console.log(`Admin app server run on port ${ADMIN_PORT}`);
+});
+
+adminApp.all('*', (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
   });
+});
 
-  // Send message to room
-  socket.on('sendMessage', ({ roomId, username, message }) => {
-    socketIO.to(roomId).emit('message', { username, message });
-    console.log('🚀: ', { username, message });
-  });
-
-  // Leave room
-  socket.on('leaveRoom', ({ roomId, username }) => {
-    if (rooms[roomId]) {
-      // check and remove user from room list if exists
-      rooms[roomId] = rooms[roomId].filter((user) => user.id !== socket.id);
-      // Send a message to the room that a user has left
-      socketIO.to(roomId).emit('message', { username: 'Admin', message: `${username} has left the room.` });
-      // Send the updated user list to everyone in the room
-      socketIO.to(roomId).emit('userList', rooms[roomId]);
-      socket.leave(roomId);
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('🔥: A user disconnected');
-    // Remove user from all rooms
-    for (const roomId in rooms) {
-      rooms[roomId] = rooms[roomId].filter((user) => user.id !== socket.id);
-      // send updated user list to everyone in the room
-      socketIO.to(roomId).emit('userList', rooms[roomId]);
-    }
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('💥 Process terminated!');
   });
 });
