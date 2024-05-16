@@ -25,8 +25,8 @@ const secretSessionKeyAdmin = process.env.SECRET_SESSION_KEY_ADMIN || 'group3';
 
 const PORT = process.env.PORT;
 const ADMIN_PORT = process.env.ADMIN_PORT;
-const CLIENT_URL = 'http://localhost:3000';
-const ADMIN_URL = 'http://localhost:3001';
+// const CLIENT_URL = 'http://localhost:3000';
+// const ADMIN_URL = 'http://localhost:3001';
 
 process.on('uncaughtException', (err) => {
   console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
@@ -53,25 +53,29 @@ const db = mongoose.connection;
 // Start express client app
 const clientApp = express();
 
-var allowedOrigins = [CLIENT_URL, ADMIN_URL];
+// var allowedOrigins = [CLIENT_URL, ADMIN_URL];
 
 // Implement CORS
-clientApp.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        var msg =
-          'The CORS policy for this site does not ' +
-          'allow access from the specified Origin.';
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    methods: 'GET,POST,PUT,DELETE',
-    credentials: true,
-  }),
-);
+// clientApp.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         var msg =
+//           'The CORS policy for this site does not ' +
+//           'allow access from the specified Origin.';
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     },
+//     methods: 'GET,POST,PUT,DELETE',
+//     credentials: true,
+//   }),
+// );
+
+clientApp.use(cors());
+// Access-Control-Allow-Origin *
+clientApp.options('*', cors());
 
 // Set security HTTP headers
 clientApp.use(helmet());
@@ -144,7 +148,7 @@ const server = http.createServer(clientApp);
 
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -163,22 +167,26 @@ clientApp.all('*', (req, res, next) => {
 // Start express client app
 const adminApp = express();
 
-adminApp.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        var msg =
-          'The CORS policy for this site does not ' +
-          'allow access from the specified Origin.';
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    methods: 'GET,POST,PUT,DELETE',
-    credentials: true,
-  }),
-);
+// adminApp.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.indexOf(origin) === -1) {
+//         var msg =
+//           'The CORS policy for this site does not ' +
+//           'allow access from the specified Origin.';
+//         return callback(new Error(msg), false);
+//       }
+//       return callback(null, true);
+//     },
+//     methods: 'GET,POST,PUT,DELETE',
+//     credentials: true,
+//   }),
+// );
+
+adminApp.use(cors());
+// Access-Control-Allow-Origin *
+adminApp.options('*', cors());
 
 // Set security HTTP headers
 adminApp.use(helmet());
